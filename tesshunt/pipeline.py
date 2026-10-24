@@ -182,6 +182,22 @@ def lightcurve_from_cutout(tpf, threshold=10, n_pca=5):
 
 # ---------- 6. centroid test (does the dip live on the target pixel?) ----------
 
+def _subtract_plane_background(flux):
+    """Per frame: fit a + b*x + c*y to the faintest 60% of pixels and subtract it."""
+    n, ny, nx = flux.shape
+    yy, xx = np.mgrid[0:ny, 0:nx]
+    A = np.column_stack([np.ones(ny * nx), xx.ravel(), yy.ravel()])
+    out = np.empty_like(flux)
+    med_img = np.nanmedian(flux, axis=0)
+    faint = med_img <= np.nanpercentile(med_img, 60)
+    Af = A[faint.ravel()]
+    pinv = np.linalg.pinv(Af)
+    for i in range(n):
+        coef = pinv @ flux[i][faint]
+        out[i] = flux[i] - (A @ coef).reshape(ny, nx)
+    return out
+
+
 def centroid_test(tpf, period, t0, duration, aperture=None, flux_floor=0.0):
     """Compare where the light is centered in-transit vs out-of-transit.
 
@@ -210,8 +226,9 @@ def centroid_test(tpf, period, t0, duration, aperture=None, flux_floor=0.0):
         return {"shift_px": np.nan, "shift_sigma": np.nan, "diff_peak_dpx": np.nan, "diff_peak_snr": np.nan,
                 "n_in": int(in_tr.sum()), "n_out": int(out.sum()), "diff_snr_map": np.zeros((ny, nx)),
                 "centroid_x": np.full(len(t), np.nan), "centroid_y": np.full(len(t), np.nan), "phase": phase, "in_transit": in_tr}
-    # background-subtract each frame with its own median so sky does not pull the centroid
-    f = flux - np.nanmedian(flux, axis=(1, 2), keepdims=True)
+    # background-subtract each frame with a tilted plane fit to its faint pixels, so a
+    # scattered-light gradient across the frame does not masquerade as a dip location
+    f = _subtract_plane_background(flux)
     f = np.clip(f, flux_floor, None)
     tot = f.sum(axis=(1, 2)) + 1e-9
     cx = (f * xx).sum(axis=(1, 2)) / tot
