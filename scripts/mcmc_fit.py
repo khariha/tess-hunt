@@ -18,6 +18,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--sector", type=int, default=1); ap.add_argument("--tic", type=int, required=True)
 ap.add_argument("--period", type=float, default=None); ap.add_argument("--walkers", type=int, default=32)
 ap.add_argument("--steps", type=int, default=3000); ap.add_argument("--burn", type=int, default=1000)
+ap.add_argument("--sectors", type=int, nargs="*", default=None, help="restrict to these sectors (e.g. undiluted apertures)")
 ap.add_argument("--max-b", type=float, default=None, help="cap impact parameter (e.g. 1.0 to forbid grazing-only solutions)")
 ap.add_argument("--u1", type=float, default=0.30); ap.add_argument("--u2", type=float, default=0.30); ap.add_argument("--u-sigma", type=float, default=0.10)
 args = ap.parse_args(); S0, tic = args.sector, args.tic
@@ -26,7 +27,7 @@ def log(m): print(f"[{time.strftime('%H:%M:%S')}] {m}", flush=True)
 sw = pd.read_csv(os.path.join(DATA, f"sweep_s{S0}.csv")).set_index("ID").loc[tic]
 tg = pd.read_csv(os.path.join(DATA, f"targets_s{S0}.csv")).drop_duplicates("ID").set_index("ID").loc[tic]
 P0 = args.period or float(sw.period_d); t00 = float(sw.t0); dur0 = float(sw.duration_h) / 24
-d = gather(tic, tg.ra, tg.dec, P0, t00, dur0, log=log)
+d = gather(tic, tg.ra, tg.dec, P0, t00, dur0, log=log, sectors=args.sectors)
 t, f, e, exp = d["t"], d["f"], d["e"], d["exp"]
 model = Model(t, exp)
 n_mid = np.round((np.median(t) - t00) / P0); t0_mid = t00 + n_mid * P0
