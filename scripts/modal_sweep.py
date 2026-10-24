@@ -7,6 +7,7 @@ Everything lives on a Modal Volume ("tess-hunt-data"):
 
 Commands (from the project root):
     modal run --detach scripts/modal_sweep.py --sector 1              # launch, then close the lid
+    modal run --detach scripts/modal_sweep.py --sectors "2 3 4 5 6"   # select targets + sweep, sector by sector, all in the cloud
     modal run --detach scripts/modal_sweep.py --sector 1 --tier tiny  # one tier
     modal run scripts/modal_sweep.py --sector 1 --mode status         # how far along
     modal run scripts/modal_sweep.py --sector 1 --mode pull           # copy results to data/ and plots/
@@ -27,9 +28,10 @@ V = "/vol"
 image = (
     modal.Image.debian_slim(python_version="3.12")
     .pip_install("numpy<2.5", "pandas", "scipy", "matplotlib", "astropy", "lightkurve>=2.5",
-                 "astrocut>=1.0", "s3fs", "fsspec")
+                 "astrocut>=1.0", "s3fs", "fsspec", "astroquery", "tess-point", "requests")
     .env({"PYTHONWARNINGS": "ignore", "MPLBACKEND": "Agg"})
     .add_local_python_source("tesshunt")
+    .add_local_dir(os.path.join(ROOT, "scripts"), remote_path="/root/scripts")
 )
 app = modal.App("tess-hunt-sweep", image=image)
 
@@ -93,11 +95,47 @@ def drive(sector: int, limit: int, tier: str, max_contratio: float, cutout: int,
     print(f"done: {n} stars, {n_cand} candidates, {(time.time()-t0)/60:.1f} min")
     return {"done": n, "candidates": n_cand}
 
+# ---------- cloud target selection (runs scripts/select_targets.py inside a container) ----------
+@app.function(cpu=1.0, memory=2048, timeout=4 * 3600, volumes={V: vol})
+def select(sector: int):
+    import subprocess, shutil
+    vol.reload()
+    if os.path.exists(f"{V}/targets_s{sector}.csv"):
+        print(f"targets_s{sector}.csv already on volume", flush=True); return
+    os.makedirs("/root/data", exist_ok=True)
+    cache = f"{V}/ctoi_tics.csv"
+    if os.path.exists(cache): shutil.copy(cache, "/root/data/ctoi_tics.csv")
+    r = subprocess.run([sys.executable, "-W", "ignore", "/root/scripts/select_targets.py", "--sector", str(sector)],
+                       capture_output=True, text=True, cwd="/root")
+    print(r.stdout[-4000:], flush=True)
+    if r.returncode != 0:
+        print(r.stderr[-4000:], flush=True); raise RuntimeError(f"select_targets failed for sector {sector}")
+    shutil.copy(f"/root/data/targets_s{sector}.csv", f"{V}/targets_s{sector}.csv")
+    vol.commit(); print(f"targets_s{sector}.csv written to volume", flush=True)
+
+# ---------- multi-sector pipeline: select then sweep, one sector at a time ----------
+@app.function(cpu=1.0, memory=1024, timeout=24 * 3600, volumes={V: vol})
+def run_sectors(sectors: list, limit: int, tier: str, max_contratio: float, cutout: int, min_snr: float, min_depth_ppm: float):
+    for s in sectors:
+        print(f"=== sector {s}: selecting targets ===", flush=True)
+        select.remote(s)
+        print(f"=== sector {s}: sweeping ===", flush=True)
+        out = drive.remote(s, limit, tier, max_contratio, cutout, min_snr, min_depth_ppm)
+        print(f"=== sector {s} done: {out} ===", flush=True)
+    return {"sectors": sectors}
+
 # ---------- laptop side ----------
 @app.local_entrypoint()
 def main(sector: int = 1, mode: str = "launch", limit: int = 0, tier: str = "all",
-         max_contratio: float = 1.0, cutout: int = 15, min_snr: float = 9.0, min_depth_ppm: float = 3000.0):
+         max_contratio: float = 1.0, cutout: int = 15, min_snr: float = 9.0, min_depth_ppm: float = 3000.0,
+         sectors: str = ""):
     import pandas as pd
+    if sectors:
+        secs = [int(x) for x in sectors.replace(",", " ").split()]
+        call = run_sectors.spawn(secs, limit, tier, max_contratio, cutout, min_snr, min_depth_ppm)
+        print(f"launched multi-sector pipeline for sectors {secs}, call id {call.object_id}")
+        print("each sector: ~25 min target selection + ~3 h sweep. status/pull per sector with --sector N --mode status|pull")
+        return
     DATA = os.path.join(ROOT, "data")
     CAND = os.path.join(ROOT, "plots", "candidates")
     os.makedirs(CAND, exist_ok=True)
