@@ -11,7 +11,9 @@ Kishore is new to astronomy. Explain concepts plainly, ramp up gradually, draw a
 4. Cross-match candidates against TOI / CTOI / confirmed-planet lists.
 
 ## Layout
-- scripts/   runnable analysis scripts
+- tesshunt/pipeline.py    the five moves + FFI pixel -> light curve
+- tesshunt/sweep_core.py  one star end to end (shared by laptop and Modal sweeps)
+- scripts/   runnable analysis scripts; modal_sweep.py is the parallel cloud sweep (Kishore runs it)
 - data/      downloaded light curves and cutouts (gitignored)
 - plots/     output images (gitignored)
 
@@ -28,4 +30,8 @@ Kishore is new to astronomy. Explain concepts plainly, ramp up gradually, draw a
 - select_targets.py crashed after a 25-min catalog pull → Exoplanet Archive `ps.tic_id` is text like "TIC 36734222", not an int → strip the prefix; and cache every slow network pull to data/ before any later step can fail.
 - ExoFOP returned HTTP 522 (down) → CTOI filter silently skipped → script now says so and uses data/ctoi_tics.csv cache when present; rerun the CTOI check before trusting a candidate list.
 - 25-min catalog pull lost when the Claude session restarted → background job was tied to the session and the cache only wrote at the end → long pulls save a .partial.csv after every chunk and resume from it; launch them with nohup so they outlive the session.
+- Sector 1 target list had 44,401 rows but only 40,328 unique TICs → cone overlap survived the merge with tess-point output → drop_duplicates("ID") after every merge; sweep.py dedupes on read too.
+- Sweep takes 5-50 s per star, download-bound → 2,900 tiny stars is ~1 day, full sector ~3 weeks sequential → parallelize downloads before sweeping the small/warm tiers.
+- TESScut (NASA hosted cutouts) limits each user to 5 requests/s and 10 concurrent, returns 503 beyond that → use astrocut TessFootprintCutout against MAST's public S3 sector cubes instead (no rate limit; sweep_core source="s3"); run it near us-east-1 (Modal) for speed.
+- Two sweeps appending to the same data/sweep_s<N>.csv can interleave rows → never run the laptop sweep and the Modal sweep at the same time on the same sector.
 - BLS duration came out exactly 2.4 h → the duration grid was coarse (0.05 d steps) → use a fine duration grid (e.g. 0.5 h to 6 h in 0.25 h steps) before trusting duration.
