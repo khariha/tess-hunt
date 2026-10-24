@@ -165,5 +165,10 @@ for row in cands.itertuples(index=False):
     except Exception as e:
         log(f"  failed: {type(e).__name__}: {e}")
         out_rows.append(dict(ID=tic, verdict=f"error: {type(e).__name__}", reasons=str(e)[:120]))
-pd.DataFrame(out_rows).to_csv(os.path.join(DATA, f"vetting_s{S}.csv"), index=False)
+vpath = os.path.join(DATA, f"vetting_s{S}.csv")
+new_df = pd.DataFrame(out_rows)
+if os.path.exists(vpath) and len(new_df):
+    old_df = pd.read_csv(vpath)
+    new_df = pd.concat([old_df[~old_df["ID"].isin(new_df["ID"])], new_df], ignore_index=True)
+new_df.to_csv(vpath, index=False)
 log(f"wrote {os.path.join(DATA, f'vetting_s{S}.csv')} and reports in {REP}")
