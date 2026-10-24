@@ -34,4 +34,5 @@ Kishore is new to astronomy. Explain concepts plainly, ramp up gradually, draw a
 - Sweep takes 5-50 s per star, download-bound → 2,900 tiny stars is ~1 day, full sector ~3 weeks sequential → parallelize downloads before sweeping the small/warm tiers.
 - TESScut (NASA hosted cutouts) limits each user to 5 requests/s and 10 concurrent, returns 503 beyond that → use astrocut TessFootprintCutout against MAST's public S3 sector cubes instead (no rate limit; sweep_core source="s3"); run it near us-east-1 (Modal) for speed.
 - Two sweeps appending to the same data/sweep_s<N>.csv can interleave rows → never run the laptop sweep and the Modal sweep at the same time on the same sector.
+- First sweep "candidate" (TIC 52153067, SNR 29) was a spotted rotator: P=0.49 d, 6 h duration, secondary -1574 ppm → SNR+depth alone do not distinguish a sine wave from a box → candidate bar also requires duration <= 1.5x physical max, duty cycle < 15%, secondary ~0, odd = even.
 - BLS duration came out exactly 2.4 h → the duration grid was coarse (0.05 d steps) → use a fine duration grid (e.g. 0.5 h to 6 h in 0.25 h steps) before trusting duration.
