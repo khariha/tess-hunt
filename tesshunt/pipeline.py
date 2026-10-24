@@ -179,3 +179,56 @@ def lightcurve_from_cutout(tpf, threshold=10, n_pca=5):
     corrector = lk.RegressionCorrector(raw.remove_nans())
     corrected = corrector.correct(dm)
     return corrected, raw, aper
+
+# ---------- 6. centroid test (does the dip live on the target pixel?) ----------
+
+def centroid_test(tpf, period, t0, duration, aperture=None, flux_floor=0.0):
+    """Compare where the light is centered in-transit vs out-of-transit.
+
+    If the dip belongs to the target, the light distribution does not move
+    during transit (it only gets fainter). If it belongs to a neighbor, the
+    center of light shifts away from that neighbor during the dip, and the
+    difference image (out minus in) peaks on the neighbor, not the target.
+
+    Returns dict with:
+      shift_px      : distance the flux-weighted centroid moves in-transit, in pixels
+      shift_sigma   : that shift divided by the scatter of out-of-transit centroids
+      diff_peak_dpx : distance from the difference-image peak to the target pixel
+      n_in, n_out   : cadences used
+    Rule of thumb: shift_sigma < 3 and diff_peak_dpx <= 1 means "on target".
+    """
+    flux = tpf.flux.value if hasattr(tpf.flux, "value") else tpf.flux
+    t = tpf.time.value
+    good = np.isfinite(flux).all(axis=(1, 2)) & np.isfinite(t)
+    flux, t = flux[good], t[good]
+    ny, nx = flux.shape[1:]
+    yy, xx = np.mgrid[0:ny, 0:nx]
+    phase = ((t - t0 + period / 2) % period) - period / 2
+    in_tr = np.abs(phase) < duration / 2
+    out = (np.abs(phase) > duration) & (np.abs(phase) < 3 * duration)
+    if in_tr.sum() < 3 or out.sum() < 10:
+        return {"shift_px": np.nan, "shift_sigma": np.nan, "diff_peak_dpx": np.nan,
+                "n_in": int(in_tr.sum()), "n_out": int(out.sum())}
+    # background-subtract each frame with its own median so sky does not pull the centroid
+    f = flux - np.nanmedian(flux, axis=(1, 2), keepdims=True)
+    f = np.clip(f, flux_floor, None)
+    tot = f.sum(axis=(1, 2)) + 1e-9
+    cx = (f * xx).sum(axis=(1, 2)) / tot
+    cy = (f * yy).sum(axis=(1, 2)) / tot
+    dx = cx[in_tr].mean() - cx[out].mean()
+    dy = cy[in_tr].mean() - cy[out].mean()
+    shift = float(np.hypot(dx, dy))
+    scatter = float(np.hypot(cx[out].std(), cy[out].std()) / np.sqrt(in_tr.sum()) + 1e-9)
+    diff = f[out].mean(axis=0) - f[in_tr].mean(axis=0)      # bright where the dip happened
+    # per-pixel noise of that difference, so a bright unrelated star cannot win on raw counts
+    noise = np.sqrt(f[out].var(axis=0) / out.sum() + f[in_tr].var(axis=0) / in_tr.sum()) + 1e-9
+    snr_map = diff / noise
+    py, px = np.unravel_index(np.nanargmax(snr_map), snr_map.shape)
+    ty, tx = ny // 2, nx // 2
+    if aperture is not None and aperture.any():
+        ty, tx = [float(v) for v in np.array(np.nonzero(aperture)).mean(axis=1)]
+    return {"shift_px": shift, "shift_sigma": shift / scatter,
+            "diff_peak_dpx": float(np.hypot(px - tx, py - ty)),
+            "diff_peak_snr": float(snr_map[py, px]),
+            "n_in": int(in_tr.sum()), "n_out": int(out.sum()), "diff_image": diff, "diff_snr_map": snr_map,
+            "centroid_x": cx, "centroid_y": cy, "phase": phase, "in_transit": in_tr}
