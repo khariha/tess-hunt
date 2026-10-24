@@ -26,6 +26,14 @@ def v(p): return float(mc.loc[p, "median"]), float(mc.loc[p, "plus"]), float(mc.
 def fmt(p, nd=4): m, pl, mi = v(p); return f"{m:.{nd}f} +{pl:.{nd}f} -{mi:.{nd}f}"
 t0, t0p, t0m = v("t0"); per, perp, perm = v("period"); dep, depp, depm = v("depth_ppm"); dur, durp, durm = v("dur_h"); rpe, rpep, rpem = v("rp_re")
 BTJD = 2457000.0
+ctoi_path = os.path.join(DATA, "ctoi_tics.csv")
+if os.path.exists(ctoi_path):
+    _ct = set(pd.read_csv(ctoi_path, header=None)[0].astype(str))
+    _date = pd.Timestamp(os.path.getmtime(ctoi_path), unit="s").strftime("%Y-%m-%d")
+    ctoi_note = (f"ALREADY LISTED as a CTOI (ExoFOP list of {_date})" if str(tic) in _ct
+                 else f"not in the ExoFOP CTOI list ({len(_ct)} entries, {_date}).")
+else:
+    ctoi_note = "CTOI list check pending ExoFOP availability."
 fields = {
     "TIC": tic, "submitter": args.submitter, "group": args.group,
     "period_days": round(per, 6), "period_err": round(max(perp, perm), 6),
@@ -40,7 +48,7 @@ fields = {
               f"Signal recovered independently in every available sector. Centroid and noise-normalized difference images place the "
               f"dip on the target in all tested 200-s sectors. Odd/even depths agree within 2.1 sigma; no secondary eclipse. "
               f"batman+emcee fit with free quadratic limb darkening. Transit-derived stellar density {v('rho_star')[0]:.1f} solar vs TIC {v('rho_cat')[0]:.1f} solar. "
-              f"Not a TOI; no literature match; CTOI list check pending ExoFOP availability."),
+              f"Not a TOI; no literature match; " + ctoi_note),
 }
 json.dump(fields, open(os.path.join(OUT, "ctoi_fields.json"), "w"), indent=2)
 for fn in [f"s{S0}_tic{tic}_mcmc.png", f"s{S0}_tic{tic}_corner.png", f"s{S0}_tic{tic}.png", f"s{S0}_tic{tic}_pixels.png", f"s{S0}_tic{tic}_fit.png"]:
@@ -89,7 +97,7 @@ Per-sector independent searches (narrow period window) and joint refinement are 
 - Odd/even: see oddeven log in notes; model-fitted odd and even depths agree within ~2 sigma.
 - Secondary eclipse at phase 0.5: consistent with zero (box test on stitched light curve).
 - Gaia DR3 neighbors within 2 px: {int(vt.n_neighbors_2px)}; brightest neighbor {vt.brightest_neighbor_frac*100:.0f}% of target light in G.
-- Catalogs: not a TOI (Exoplanet Archive TOI table); not a known planet host; no ADS literature match for the TIC. CTOI list: check pending ExoFOP availability.
+- Catalogs: not a TOI (Exoplanet Archive TOI table); not a known planet host; no ADS literature match for the TIC. CTOI: {ctoi_note}
 
 ## Interpretation
 Rp/Rs = {v('rp_rs')[0]:.3f} implies a {rpe:.1f} Rearth companion; nothing self-luminous is this small, so unless diluted by an unresolved brighter star the companion is planet-sized. Transit-derived stellar density agrees with the catalog within the b / a/Rs degeneracy.

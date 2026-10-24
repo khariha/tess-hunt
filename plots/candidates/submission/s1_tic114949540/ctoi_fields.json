@@ -15,5 +15,5 @@
   "transit_snr": 12.5,
   "sectors_used": "[1, 27, 105]",
   "tag": "tess-hunt FFI search, sector 1 detection, multi-sector confirmed",
-  "notes": "Detected in an independent BLS search of SPOC FFI cutouts (astrocut, S3 cubes) of Tmag 12-15 M dwarfs. Signal recovered independently in every available sector. Centroid and noise-normalized difference images place the dip on the target in all tested 200-s sectors. Odd/even depths agree within 2.1 sigma; no secondary eclipse. batman+emcee fit with free quadratic limb darkening. Transit-derived stellar density 3.3 solar vs TIC 5.6 solar. Not a TOI; no literature match; CTOI list check pending ExoFOP availability."
+  "notes": "Detected in an independent BLS search of SPOC FFI cutouts (astrocut, S3 cubes) of Tmag 12-15 M dwarfs. Signal recovered independently in every available sector. Centroid and noise-normalized difference images place the dip on the target in all tested 200-s sectors. Odd/even depths agree within 2.1 sigma; no secondary eclipse. batman+emcee fit with free quadratic limb darkening. Transit-derived stellar density 3.3 solar vs TIC 5.6 solar. Not a TOI; no literature match; not in the ExoFOP CTOI list (4936 entries, 2026-10-24)."
 }

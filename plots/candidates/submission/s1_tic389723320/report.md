@@ -34,12 +34,12 @@ Independent box-least-squares search of FFI cutouts (SPOC calibrated FFIs via MA
 Per-sector independent searches (narrow period window) and joint refinement are in the follow-up figure.
 
 ## Vetting
-- Centroid / difference image (sector 1): on_target; shift 0.2 sigma; difference-image peak 0.5 px from target at 5 sigma.
+- Centroid / difference image (sector 1): on_target; shift 0.9 sigma; difference-image peak 0.5 px from target at 11 sigma.
 - Difference images in 200-s sectors: see pixels figure (dip on target in every tested sector).
 - Odd/even: see oddeven log in notes; model-fitted odd and even depths agree within ~2 sigma.
 - Secondary eclipse at phase 0.5: consistent with zero (box test on stitched light curve).
 - Gaia DR3 neighbors within 2 px: 2; brightest neighbor 23% of target light in G.
-- Catalogs: not a TOI (Exoplanet Archive TOI table); not a known planet host; no ADS literature match for the TIC. CTOI list: check pending ExoFOP availability.
+- Catalogs: not a TOI (Exoplanet Archive TOI table); not a known planet host; no ADS literature match for the TIC. CTOI: not in the ExoFOP CTOI list (4936 entries, 2026-10-24).
 
 ## Interpretation
 Rp/Rs = 0.114 implies a 4.6 Rearth companion; nothing self-luminous is this small, so unless diluted by an unresolved brighter star the companion is planet-sized. Transit-derived stellar density agrees with the catalog within the b / a/Rs degeneracy.

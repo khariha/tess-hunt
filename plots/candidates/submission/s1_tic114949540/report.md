@@ -39,7 +39,7 @@ Per-sector independent searches (narrow period window) and joint refinement are 
 - Odd/even: see oddeven log in notes; model-fitted odd and even depths agree within ~2 sigma.
 - Secondary eclipse at phase 0.5: consistent with zero (box test on stitched light curve).
 - Gaia DR3 neighbors within 2 px: 4; brightest neighbor 12% of target light in G.
-- Catalogs: not a TOI (Exoplanet Archive TOI table); not a known planet host; no ADS literature match for the TIC. CTOI list: check pending ExoFOP availability.
+- Catalogs: not a TOI (Exoplanet Archive TOI table); not a known planet host; no ADS literature match for the TIC. CTOI: not in the ExoFOP CTOI list (4936 entries, 2026-10-24).
 
 ## Interpretation
 Rp/Rs = 0.093 implies a 4.3 Rearth companion; nothing self-luminous is this small, so unless diluted by an unresolved brighter star the companion is planet-sized. Transit-derived stellar density agrees with the catalog within the b / a/Rs degeneracy.
