@@ -75,7 +75,15 @@ def sweep_star(t, sector, cutout=15, source="s3", min_snr=9.0, min_depth_ppm=300
                    odd_ppm=v["odd_depth_ppm"], even_ppm=v["even_depth_ppm"], depth_err_ppm=v["depth_err_ppm"],
                    secondary_ppm=v["secondary_depth_ppm"], n_transits=v["n_transits"],
                    planet_re=P.planet_radius_earths(max(r.depth, 0), t.rad))
-        is_cand = bool(r.snr >= min_snr and r.depth * 1e6 >= min_depth_ppm and v["n_transits"] >= 2)
+        # candidate bar: strong, deep, repeated, AND transit-shaped (kills spotted rotators)
+        err = v["depth_err_ppm"] if np.isfinite(v["depth_err_ppm"]) and v["depth_err_ppm"] > 0 else 1e9
+        shaped = (
+            row["duration_h"] <= 1.5 * row["max_duration_h"]            # not longer than physics allows
+            and r.duration / r.period < 0.15                             # dip is a sliver of the orbit
+            and abs(v["secondary_depth_ppm"]) < 3 * err                  # nothing at phase 0.5
+            and abs(v["odd_depth_ppm"] - v["even_depth_ppm"]) < 3 * err  # odd and even dips agree
+        )
+        is_cand = bool(r.snr >= min_snr and r.depth * 1e6 >= min_depth_ppm and v["n_transits"] >= 2 and shaped)
         row["candidate"] = is_cand
         if is_cand and make_plot:
             import matplotlib
