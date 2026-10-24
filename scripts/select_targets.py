@@ -93,7 +93,7 @@ on = pd.DataFrame({"ID": [str(x) for x in ids_on], "sector": sec_on, "camera": c
 on = on[on["sector"] == S].drop_duplicates("ID")
 # stay 5 px off the CCD edge like the mission does
 on = on[(on["col"] > 49) & (on["col"] < 2088) & (on["row"] > 5) & (on["row"] < 2044)]
-pool = pool.merge(on, on="ID")
+pool = pool.merge(on, on="ID").drop_duplicates("ID")
 log(f"on a CCD in sector {S}: {len(pool)}")
 
 # ---- 4. remove 2-minute targets ----
