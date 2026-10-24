@@ -18,6 +18,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--sector", type=int, default=1); ap.add_argument("--tic", type=int, required=True)
 ap.add_argument("--period", type=float, default=None); ap.add_argument("--walkers", type=int, default=32)
 ap.add_argument("--steps", type=int, default=3000); ap.add_argument("--burn", type=int, default=1000)
+ap.add_argument("--max-b", type=float, default=None, help="cap impact parameter (e.g. 1.0 to forbid grazing-only solutions)")
 ap.add_argument("--u1", type=float, default=0.30); ap.add_argument("--u2", type=float, default=0.30); ap.add_argument("--u-sigma", type=float, default=0.10)
 args = ap.parse_args(); S0, tic = args.sector, args.tic
 def log(m): print(f"[{time.strftime('%H:%M:%S')}] {m}", flush=True)
@@ -33,7 +34,8 @@ rp0 = np.sqrt(float(sw.depth_ppm) / 1e6)
 
 def lnprior(th):
     t0, per, rp, ars, b, u1, u2 = th
-    if not (abs(t0 - t0_mid) < 0.1 and P0 * 0.995 < per < P0 * 1.005 and 0.005 < rp < 0.6 and 1.5 < ars < 300 and 0 <= b < 1 + rp): return -np.inf
+    bmax = args.max_b if args.max_b is not None else 1 + rp
+    if not (abs(t0 - t0_mid) < 0.1 and P0 * 0.995 < per < P0 * 1.005 and 0.005 < rp < 0.6 and 1.5 < ars < 300 and 0 <= b < bmax): return -np.inf
     if not (0 <= u1 <= 1 and 0 <= u1 + u2 <= 1 and u2 > -1): return -np.inf
     return -0.5 * (((u1 - args.u1) / args.u_sigma) ** 2 + ((u2 - args.u2) / args.u_sigma) ** 2)
 def lnprob(th):
