@@ -207,8 +207,9 @@ def centroid_test(tpf, period, t0, duration, aperture=None, flux_floor=0.0):
     in_tr = np.abs(phase) < duration / 2
     out = (np.abs(phase) > duration) & (np.abs(phase) < 3 * duration)
     if in_tr.sum() < 3 or out.sum() < 10:
-        return {"shift_px": np.nan, "shift_sigma": np.nan, "diff_peak_dpx": np.nan,
-                "n_in": int(in_tr.sum()), "n_out": int(out.sum())}
+        return {"shift_px": np.nan, "shift_sigma": np.nan, "diff_peak_dpx": np.nan, "diff_peak_snr": np.nan,
+                "n_in": int(in_tr.sum()), "n_out": int(out.sum()), "diff_snr_map": np.zeros((ny, nx)),
+                "centroid_x": np.full(len(t), np.nan), "centroid_y": np.full(len(t), np.nan), "phase": phase, "in_transit": in_tr}
     # background-subtract each frame with its own median so sky does not pull the centroid
     f = flux - np.nanmedian(flux, axis=(1, 2), keepdims=True)
     f = np.clip(f, flux_floor, None)
