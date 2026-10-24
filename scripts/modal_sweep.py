@@ -19,6 +19,7 @@ image = (
     modal.Image.debian_slim(python_version="3.12")
     .pip_install("numpy<2.5", "pandas", "scipy", "matplotlib", "astropy", "lightkurve>=2.5",
                  "astrocut>=1.0", "s3fs", "fsspec")
+    .env({"PYTHONWARNINGS": "ignore", "MPLBACKEND": "Agg"})
     .add_local_python_source("tesshunt")
 )
 app = modal.App("tess-hunt-sweep", image=image)
