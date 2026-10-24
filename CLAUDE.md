@@ -4,11 +4,21 @@ Transit photometry search over TESS data. Goal: an agent that finds unreported p
 
 Kishore is new to astronomy. Explain concepts plainly, ramp up gradually, draw a diagram when it helps.
 
-## Plan
-1. Learn on a known planet: Pi Mensae c, Sector 1, 2-minute data (scripts/pimen_s1.py).
-2. Build the five-step pipeline as reusable functions: clean, flatten, BLS search, fold, vet.
-3. Move to FFI cutouts (TESScut) of stars not on the 2-minute target list.
-4. Cross-match candidates against TOI / CTOI / confirmed-planet lists.
+## Status (24 Oct 2026)
+- Sector 1 swept (38,620 red dwarfs, Tmag 12-15, R<0.6): 22 flagged, vetted in data/vetting_s1.csv.
+- Submission batch, packages in plots/candidates/submission/ (tracked in git):
+  1. TIC 389723320  P=3.927167 d  4.6 Re sub-Neptune, 6 sectors, cleanest
+  2. TIC 114949540  P=2.739176 d  4.35 Re hot Neptune, 3 sectors
+  3. TIC 259719966  P=11.077205 d 0.94 Rjup warm Jupiter-sized, 9 sectors (mass unknown: planet/BD/star)
+  Held back: TIC 235013874 (grazing, radius lower limit ~6 Re).
+- Blocked: ExoFOP down (HTTP 522/525 from both home and Modal) -> CTOI duplicate check + Kishore's account + submission.
+- Running: `modal run --detach scripts/modal_sweep.py --sectors "2 3 4 5 6"` (select + sweep per sector, all in cloud).
+  Check: `--sector N --mode status`; fetch: `--sector N --mode pull`; then `scripts/vet_candidates.py --sector N`,
+  `scripts/followup.py`, `scripts/mcmc_fit.py`, `scripts/make_ctoi_package.py` for survivors.
+- Also check our candidates against published faint-star FFI candidate tables (DIAmante, TESS faint-star search) before submitting.
+
+## Pipeline (scripts, in order)
+select_targets.py -> modal_sweep.py (or sweep.py) -> vet_candidates.py -> followup.py -> oddeven_fit.py -> mcmc_fit.py -> make_ctoi_package.py; residual_search.py looks for a second planet.
 
 ## Layout
 - tesshunt/pipeline.py    the five moves + FFI pixel -> light curve
