@@ -135,7 +135,19 @@ def vet(flat, period, t0, duration):
     from_half = ((t - t0) % period) - period / 2
     sec = f[np.abs(from_half) < duration / 2]
     n_in = max(in_tr.sum(), 1)
+    # secondary at ANY phase: an eccentric orbit moves the eclipse away from 0.5
+    # (TIC 259719966's 0.9% eclipse sat at phase 0.54 and passed the phase-0.5 test)
+    phase = ((t - t0) % period) / period
+    best_any, best_phase = 0.0, np.nan
+    for c in np.arange(0.15, 0.851, 0.01):
+        w = np.abs(((phase - c + 0.5) % 1) - 0.5) < (duration / period) / 2
+        if w.sum() >= 5:
+            d = np.nanmean(out) - np.nanmean(f[w])
+            if d > best_any:
+                best_any, best_phase = d, c
     return {
+        "secondary_any_phase_ppm": best_any * 1e6,
+        "secondary_any_phase_at": best_phase,
         "odd_depth_ppm": (1 - np.nanmean(odd)) * 1e6 if len(odd) else float("nan"),
         "even_depth_ppm": (1 - np.nanmean(even)) * 1e6 if len(even) else float("nan"),
         "secondary_depth_ppm": (1 - np.nanmean(sec)) * 1e6 if len(sec) else float("nan"),

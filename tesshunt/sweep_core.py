@@ -82,6 +82,7 @@ def sweep_star(t, sector, cutout=15, source="s3", min_snr=9.0, min_depth_ppm=300
             row["duration_h"] <= 1.5 * row["max_duration_h"]            # not longer than physics allows
             and r.duration / r.period < 0.15                             # dip is a sliver of the orbit
             and abs(v["secondary_depth_ppm"]) < 3 * err                  # nothing at phase 0.5
+            and v.get("secondary_any_phase_ppm", 0) < 4 * err             # ...nor at any other phase (eccentric EBs)
             and abs(v["odd_depth_ppm"] - v["even_depth_ppm"]) < 3 * err  # odd and even dips agree
         )
         is_cand = bool(r.snr >= min_snr and r.depth * 1e6 >= min_depth_ppm and v["n_transits"] >= 2 and shaped)
