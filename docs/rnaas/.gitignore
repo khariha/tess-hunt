@@ -3,3 +3,4 @@ build.log
 *.out
 *.fls
 *.fdb_latexmk
+*.log
