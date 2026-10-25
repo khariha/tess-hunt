@@ -117,8 +117,20 @@ if args.tic:
     cands = cands[cands.ID == args.tic]
 log(f"{len(cands)} candidates to vet")
 out_rows = []
+def target_row(tic, sweep_row=None):
+    """The target-list row, or the TIC catalog entry when the regenerated list no longer has the star
+    (select_targets filters out stars that became TOIs/CTOIs after the sweep)."""
+    if tic in tg.index:
+        return tg.loc[tic]
+    log(f"  TIC {tic} not in targets_s{S}.csv (new TOI/CTOI since the sweep?): fetching from the TIC")
+    from astroquery.mast import Catalogs
+    c = Catalogs.query_criteria(catalog="Tic", ID=tic).to_pandas().iloc[0]
+    return pd.Series({"ID": tic, "ra": float(c.ra), "dec": float(c.dec), "Tmag": float(c.Tmag), "Teff": float(c.Teff), "rad": float(c.rad),
+                      "mass": float(c.mass), "contratio": float(c.contratio), "d": float(c.d),
+                      "camera": int(getattr(sweep_row, "camera", 0) or 0), "ccd": int(getattr(sweep_row, "ccd", 0) or 0), "col": float("nan"), "row": float("nan")})
+
 for row in cands.itertuples(index=False):
-    tic = int(row.ID); t = tg.loc[tic]
+    tic = int(row.ID); t = target_row(tic, row)
     log(f"TIC {tic}")
     try:
         toi, ps = catalog_check(tic)
