@@ -25,7 +25,7 @@ Sector 1: 38,620 stars searched, 22 flagged, 3 candidates that pass every test a
 | 114949540 | 2.739176 | 0.9% | 4.35 Earth | 3 |
 | 259719966 | 11.077205 | 3.8% | 0.94 Jupiter | 9 |
 
-Reports and figures: `plots/candidates/submission/`. Write-up: `docs/rnaas/` (Research Note of the AAS, submitted). A fourth, grazing candidate (TIC 235013874) is held back.
+Reports and figures: `plots/candidates/submission/`. Write-up: `docs/rnaas/` (Research Note of the AAS, submitted 2026-10-25, manuscript AAS82771). A fourth, grazing candidate (TIC 235013874) is held back.
 
 ## Reproducing
 

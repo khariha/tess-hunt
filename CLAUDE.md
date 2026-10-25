@@ -11,7 +11,9 @@ Kishore is new to astronomy. Explain concepts plainly, ramp up gradually, draw a
   2. TIC 114949540  P=2.739176 d  4.35 Re hot Neptune, 3 sectors
   3. TIC 259719966  P=11.077205 d 0.94 Rjup warm Jupiter-sized, 9 sectors (mass unknown: planet/BD/star)
   Held back: TIC 235013874 (grazing, radius lower limit ~6 Re).
-- Blocked: ExoFOP down (HTTP 522/525 from both home and Modal) -> CTOI duplicate check + Kishore's account + submission.
+- ExoFOP policy (Aug 2026): community candidates must be published first (refereed journal, or an RNAAS citing published methods). CTOI duplicate check done 2026-10-24: none of the four listed. Kishore has an ExoFOP account.
+- Research Note submitted to RNAAS 2026-10-25, manuscript AAS82771 (docs/rnaas/). Next: on acceptance, post to arXiv astro-ph.EP, then file the ExoFOP Published Candidate Upload Request with the note's URL and enter the three candidates from plots/candidates/submission/*/ctoi_fields.json.
+- Public repo: https://github.com/khariha/tess-hunt
 - Running: `modal run --detach scripts/modal_sweep.py --sectors "2 3 4 5 6"` (select + sweep per sector, all in cloud).
   Check: `--sector N --mode status`; fetch: `--sector N --mode pull`; then `scripts/vet_candidates.py --sector N`,
   `scripts/followup.py`, `scripts/mcmc_fit.py`, `scripts/make_ctoi_package.py` for survivors.
