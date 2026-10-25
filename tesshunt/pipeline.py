@@ -175,8 +175,11 @@ def lightcurve_from_cutout(tpf, threshold=10, n_pca=5):
     raw = tpf.to_lightcurve(aperture_mask=aper)
     regressors = tpf.flux[:, ~aper]
     regressors = regressors.value if hasattr(regressors, "value") else regressors
-    dm = lk.DesignMatrix(regressors, name="background").pca(n_pca).append_constant()
-    corrector = lk.RegressionCorrector(raw.remove_nans())
+    # drop cadences where either the aperture sum or any background pixel is non-finite,
+    # from BOTH the light curve and the regressors, so the design matrix rows line up
+    good = np.isfinite(raw.flux.value) & np.isfinite(regressors).all(axis=1)
+    dm = lk.DesignMatrix(regressors[good], name="background").pca(n_pca).append_constant()
+    corrector = lk.RegressionCorrector(raw[good])
     corrected = corrector.correct(dm)
     return corrected, raw, aper
 

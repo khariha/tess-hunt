@@ -36,8 +36,9 @@ def _central_aperture(tpf, half=1):
     aper[c-half:c+half+1, c-half:c+half+1] = True
     raw = tpf.to_lightcurve(aperture_mask=aper)
     reg = tpf.flux[:, ~aper]; reg = reg.value if hasattr(reg, "value") else reg
-    dm = lk.DesignMatrix(reg, name="bg").pca(5).append_constant()
-    return lk.RegressionCorrector(raw.remove_nans()).correct(dm), raw, aper
+    good = np.isfinite(raw.flux.value) & np.isfinite(reg).all(axis=1)
+    dm = lk.DesignMatrix(reg[good], name="bg").pca(5).append_constant()
+    return lk.RegressionCorrector(raw[good]).correct(dm), raw, aper
 
 def sweep_star(t, sector, cutout=15, source="s3", min_snr=9.0, min_depth_ppm=3000.0, make_plot=True):
     """t: anything with .ID .ra .dec .Tmag .Teff .rad .mass .contratio .camera .ccd
