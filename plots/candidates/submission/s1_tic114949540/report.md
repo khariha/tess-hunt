@@ -37,7 +37,7 @@ Per-sector independent searches (narrow period window) and joint refinement are 
 - Centroid / difference image (sector 1): on_target; shift 1.6 sigma; difference-image peak 0.5 px from target at 6 sigma.
 - Difference images in 200-s sectors: see pixels figure (dip on target in every tested sector).
 - Odd/even: see oddeven log in notes; model-fitted odd and even depths agree within ~2 sigma.
-- Secondary eclipse at phase 0.5: consistent with zero (box test on stitched light curve).
+- Secondary eclipse: consistent with zero at phase 0.5 AND at every phase 0.15-0.85 (scripts/secondary_scan.py, per-sector agreement required): < 700 ppm (3 sigma).
 - Gaia DR3 neighbors within 2 px: 4; brightest neighbor 12% of target light in G.
 - Catalogs: not a TOI (Exoplanet Archive TOI table); not a known planet host; no ADS literature match for the TIC. CTOI: not in the ExoFOP CTOI list (4936 entries, 2026-10-24).
 

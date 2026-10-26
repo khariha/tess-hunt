@@ -32,25 +32,34 @@ for s in sectors:
         lc = P.clean(lc)
         ph = ((lc.time.value - t0 + P0 / 2) % P0) - P0 / 2
         flat = P.mask_jitter(P.flatten(lc[np.abs(ph) > 1.0 * dur], 33), 6, 3)
-        flats.append(flat); log(f"sector {s}: {len(flat)} points")
+        flat.meta["SECTOR"] = s; flats.append(flat); log(f"sector {s}: {len(flat)} points")
     except Exception as e:
         log(f"sector {s}: {type(e).__name__}: {e}")
-st = lk.LightCurveCollection(flats).stitch(); st = st[np.isfinite(st.flux.value)]
-t, f = st.time.value, st.flux.value
-phase = ((t - t0) % P0) / P0
-sig = np.nanstd(f)
+# robust version: medians, MAD errors, and a real eclipse must appear in EVERY sector at the same phase
+secs_used = []
+for fl in flats:
+    fl.meta["SEC"] = int(fl.meta.get("SECTOR", 0)) if fl.meta.get("SECTOR") else len(secs_used)
+    secs_used.append(fl)
+def depth_at(fl, c):
+    t, f = fl.time.value, fl.flux.value
+    phase = ((t - t0) % P0) / P0
+    w = np.abs(((phase - c + 0.5) % 1) - 0.5) < (dur / P0) / 2
+    if w.sum() < 4: return np.nan, np.nan, 0
+    mad = np.nanmedian(np.abs(f - np.nanmedian(f))) * 1.4826
+    return (np.nanmedian(f[~w]) - np.nanmedian(f[w])) * 1e6, mad / np.sqrt(w.sum()) * 1e6 * 1.25, int(w.sum())
 rows = []
-for c in np.arange(0.05, 0.951, 0.005):
-    inwin = np.abs(((phase - c + 0.5) % 1) - 0.5) < (dur / P0) / 2
-    if inwin.sum() < 5: continue
-    d = (np.nanmean(f[~inwin]) - np.nanmean(f[inwin])) * 1e6
-    e = sig / np.sqrt(inwin.sum()) * 1e6
-    rows.append((c, d, e, int(inwin.sum())))
-df = pd.DataFrame(rows, columns=["phase", "depth_ppm", "err_ppm", "n"]); df["sigma"] = df.depth_ppm / df.err_ppm
+for c in np.arange(0.10, 0.901, 0.005):
+    ds = [depth_at(fl, c) for fl in flats]
+    d = np.array([x[0] for x in ds]); e = np.array([x[1] for x in ds]); ok = np.isfinite(d) & np.isfinite(e) & (e > 0)
+    if ok.sum() == 0: continue
+    wmean = np.sum(d[ok] / e[ok] ** 2) / np.sum(1 / e[ok] ** 2); werr = np.sqrt(1 / np.sum(1 / e[ok] ** 2))
+    n_pos = int(np.sum(d[ok] > 2 * e[ok]))     # sectors where the dip is individually significant
+    rows.append((c, wmean, werr, n_pos, int(ok.sum()), ";".join(f"{x:+.0f}" for x in d[ok])))
+df = pd.DataFrame(rows, columns=["phase", "depth_ppm", "err_ppm", "n_sectors_2sig", "n_sectors", "per_sector_ppm"]); df["sigma"] = df.depth_ppm / df.err_ppm
 best = df.loc[df.sigma.idxmax()]; p5 = df.iloc[(df.phase - 0.5).abs().argmin()]
-log(f"TIC {a.tic}: {len(t)} points over {len(flats)} sectors; per-point scatter {sig*1e6:.0f} ppm")
-log(f"  phase 0.50: {p5.depth_ppm:+.0f} +/- {p5.err_ppm:.0f} ppm ({p5.sigma:.1f} sigma)")
-log(f"  deepest anywhere: {best.depth_ppm:+.0f} +/- {best.err_ppm:.0f} ppm ({best.sigma:.1f} sigma) at phase {best.phase:.3f}")
-top = df.sort_values("sigma", ascending=False).head(3)
-for _, r in top.iterrows(): log(f"    phase {r.phase:.3f}: {r.depth_ppm:+.0f} ppm, {r.sigma:.1f} sigma, n={r.n}")
+log(f"TIC {a.tic}: {len(flats)} sectors")
+log(f"  phase 0.50: {p5.depth_ppm:+.0f} +/- {p5.err_ppm:.0f} ppm ({p5.sigma:.1f} sigma), per sector {p5.per_sector_ppm}")
+log(f"  deepest anywhere: {best.depth_ppm:+.0f} +/- {best.err_ppm:.0f} ppm ({best.sigma:.1f} sigma) at phase {best.phase:.3f}; individually >2 sigma in {best.n_sectors_2sig}/{best.n_sectors} sectors; per sector {best.per_sector_ppm}")
+top = df.sort_values("sigma", ascending=False).head(4)
+for _, r in top.iterrows(): log(f"    phase {r.phase:.3f}: {r.depth_ppm:+.0f} +/- {r.err_ppm:.0f} ppm ({r.sigma:.1f} sigma), {r.n_sectors_2sig}/{r.n_sectors} sectors agree")
 df.to_csv(os.path.join(DATA, f"secondary_scan_{a.tic}.csv"), index=False)

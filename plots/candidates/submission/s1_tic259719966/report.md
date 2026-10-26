@@ -1,3 +1,5 @@
+# WITHDRAWN 2026-10-25: eccentric low-mass eclipsing binary, not a planet candidate. See vetting_addendum.md (secondary eclipse 0.92% at phase 0.5405, 39 sigma, confirmed in MIT QLP data).
+
 # Community TOI candidate: TIC 259719966
 
 Submitter: Kishore Hariharan (Generative Experiences / tess-hunt). Prepared 2026-10-24.
