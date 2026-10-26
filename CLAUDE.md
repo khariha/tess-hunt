@@ -12,7 +12,8 @@ Kishore is new to astronomy. Explain concepts plainly, ramp up gradually, draw a
   3. ~~TIC 259719966~~ WITHDRAWN 2026-10-25: eccentric M+M eclipsing binary (secondary 0.9% at phase 0.54); see plots/candidates/submission/s1_tic259719966/vetting_addendum.md
   Held back: TIC 235013874 (grazing, radius lower limit ~6 Re).
 - ExoFOP policy (Aug 2026): community candidates must be published first (refereed journal, or an RNAAS citing published methods). CTOI duplicate check done 2026-10-24: none of the four listed. Kishore has an ExoFOP account.
-- Research Note submitted to RNAAS 2026-10-25, manuscript AAS82771 (docs/rnaas/). Next: on acceptance, post to arXiv astro-ph.EP, then file the ExoFOP Published Candidate Upload Request with the note's URL and enter the three candidates from plots/candidates/submission/*/ctoi_fields.json.
+- Research Note submitted to RNAAS 2026-10-25, manuscript AAS82771 (docs/rnaas/). Revision (two candidates, TIC 259719966 described as an eccentric EB) sent to AAS staff via manuscript correspondence 2026-10-25 evening with rnaas.tex, figure1.pdf, rnaas.pdf attached; awaiting their reply. Next: on acceptance, post to arXiv astro-ph.EP, then file the ExoFOP Published Candidate Upload Request with the note's URL and enter the two candidates from plots/candidates/submission/s1_tic{389723320,114949540}/ctoi_fields.json.
+- Public mentions of three candidates (Kanodia email, Sentinel pitch, LinkedIn) are corrected only if someone follows up; genexperiences.com/tess-hunt already shows two.
 - Public repo: https://github.com/khariha/tess-hunt
 - Running: `modal run --detach scripts/modal_sweep.py --sectors "2 3 4 5 6"` (select + sweep per sector, all in cloud).
   Check: `--sector N --mode status`; fetch: `--sector N --mode pull`; then `scripts/vet_candidates.py --sector N`,
