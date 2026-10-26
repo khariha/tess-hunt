@@ -49,7 +49,8 @@ ls = least_squares(lambda th: np.concatenate([(f - model(*th)) / e, [(th[5] - ar
                    bounds=([t0_mid - 0.1, P0 * 0.995, 0.005, 1.5, 0, 0, -0.5], [t0_mid + 0.1, P0 * 1.005, 0.6, 300, 1.2, 1, 1]))
 x0 = ls.x; log(f"least squares start: {x0}")
 ndim = len(x0); p0 = x0 + np.array([1e-4, 1e-6, 1e-3, 0.3, 0.02, 0.02, 0.02]) * np.random.randn(args.walkers, ndim)
-p0[:, 4] = np.clip(p0[:, 4], 0, 0.95)
+p0[:, 4] = np.clip(p0[:, 4], 0.02, 0.93) + np.random.uniform(-0.01, 0.01, args.walkers)   # keep walkers distinct after clipping
+p0[:, 3] = np.clip(p0[:, 3], 2.0, 250.0)
 sampler = emcee.EnsembleSampler(args.walkers, ndim, lnprob)
 t_start = time.time()
 sampler.run_mcmc(p0, args.steps, progress=False)
