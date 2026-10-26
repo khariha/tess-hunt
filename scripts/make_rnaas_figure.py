@@ -9,9 +9,8 @@ from tesshunt.transitfit import gather, Model
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); DATA = os.path.join(ROOT, "data"); FU = os.path.join(ROOT, "plots", "candidates", "followup")
 os.makedirs(os.path.join(ROOT, "docs"), exist_ok=True)
 sw = pd.read_csv(os.path.join(DATA, "sweep_s1.csv")).set_index("ID"); tg = pd.read_csv(os.path.join(DATA, "targets_s1.csv")).drop_duplicates("ID").set_index("ID")
-cases = [(389723320, None, "TIC 389723320  P = 3.9272 d  4.6 R$_\\oplus$"), (114949540, None, "TIC 114949540  P = 2.7392 d  4.35 R$_\\oplus$"),
-         (259719966, [1, 27, 67, 94, 95, 103], "TIC 259719966  P = 11.0772 d  0.94 R$_\\mathrm{Jup}$")]
-fig, axes = plt.subplots(1, 3, figsize=(12, 3.6))
+cases = [(389723320, None, "TIC 389723320  P = 3.9272 d  4.6 R$_\\oplus$"), (114949540, None, "TIC 114949540  P = 2.7392 d  4.35 R$_\\oplus$")]
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.6))
 for ax, (tic, secs, title) in zip(axes, cases):
     mc = pd.read_csv(os.path.join(FU, f"s1_tic{tic}_mcmc.csv")).set_index("param")["median"]
     t0, per, rp, ars, b, u1, u2 = [mc[k] for k in ["t0", "period", "rp_rs", "a_rs", "b", "u1", "u2"]]
