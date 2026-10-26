@@ -140,6 +140,14 @@ for row in cands.itertuples(index=False):
         c = P.centroid_test(tpf, row.period_d, row.t0, row.duration_h / 24, aperture=aper)
         g, (tx, ty) = gaia_neighbors(t.ra, t.dec, tpf)
         v, reasons, exp_shift = verdict(row, c, g)
+        # secondary eclipse at ANY phase (eccentric binaries put it away from 0.5)
+        vv = P.vet(flat, row.period_d, row.t0, row.duration_h / 24)
+        any_sec, any_ph, err = vv.get("secondary_any_phase_ppm", 0.0), vv.get("secondary_any_phase_at", float("nan")), vv["depth_err_ppm"]
+        if np.isfinite(err) and err > 0 and any_sec > 4 * err:
+            v = "eclipsing_binary"
+            reasons.insert(0, f"secondary eclipse {any_sec:.0f} ppm ({any_sec/err:.1f} sigma) at phase {any_ph:.2f}: eccentric eclipsing binary")
+        else:
+            reasons.append(f"no secondary at any phase 0.15-0.85 (< {4*err:.0f} ppm)")
         # ---- figure ----
         fig, ax = plt.subplots(2, 2, figsize=(13, 9))
         flat.plot(ax=ax[0, 0]); ax[0, 0].set_title(f"TIC {tic}  Tmag {t.Tmag:.1f}  R={t.rad:.2f}  Teff={t.Teff:.0f}  d={t.d:.0f} pc")
@@ -172,6 +180,7 @@ for row in cands.itertuples(index=False):
                              shift_px=c["shift_px"], shift_sigma=c["shift_sigma"], exp_shift_px=exp_shift,
                              diff_peak_dpx=c["diff_peak_dpx"], diff_peak_snr=c["diff_peak_snr"],
                              n_neighbors_2px=int((g.sep_px <= 2).sum() - 1), brightest_neighbor_frac=float(g[g.index > 0].light_frac.max()) if len(g) > 1 else 0.0,
+                             secondary_any_phase_ppm=any_sec, secondary_any_phase_at=any_ph,
                              reasons=" | ".join(reasons)))
         log(f"  -> {v}: " + "; ".join(reasons))
     except Exception as e:

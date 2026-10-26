@@ -91,7 +91,10 @@ if len(flats) >= 2:
     joint = dict(period=Pj, t0=t0j, duration_h=durj * 24, depth_ppm=dj * 1e6, baseline_d=base, n_transits=vj["n_transits"],
                  odd=vj["odd_depth_ppm"], even=vj["even_depth_ppm"], err=vj["depth_err_ppm"], secondary=vj["secondary_depth_ppm"],
                  period_err_est=P0 * durj / base)
-    log(f"joint: P={Pj:.6f} d (+/-~{joint['period_err_est']:.6f}) depth={dj*1e6:.0f} ppm over {base:.0f} days, {vj['n_transits']} transits, odd/even {vj['odd_depth_ppm']:.0f}/{vj['even_depth_ppm']:.0f} +/- {vj['depth_err_ppm']:.0f}, secondary {vj['secondary_depth_ppm']:.0f}")
+    joint["secondary_any_phase_ppm"] = vj.get("secondary_any_phase_ppm", float("nan")); joint["secondary_any_phase_at"] = vj.get("secondary_any_phase_at", float("nan"))
+    log(f"joint: P={Pj:.6f} d (+/-~{joint['period_err_est']:.6f}) depth={dj*1e6:.0f} ppm over {base:.0f} days, {vj['n_transits']} transits, odd/even {vj['odd_depth_ppm']:.0f}/{vj['even_depth_ppm']:.0f} +/- {vj['depth_err_ppm']:.0f}, secondary at 0.5 {vj['secondary_depth_ppm']:.0f}, deepest at any phase {joint['secondary_any_phase_ppm']:.0f} ppm (phase {joint['secondary_any_phase_at']:.2f})")
+    if np.isfinite(joint["secondary_any_phase_ppm"]) and joint["secondary_any_phase_ppm"] > 4 * vj["depth_err_ppm"]:
+        log("WARNING: secondary eclipse away from phase 0.5 -> likely eccentric eclipsing binary")
 
 # ---- figure ----
 n = len(flats)
