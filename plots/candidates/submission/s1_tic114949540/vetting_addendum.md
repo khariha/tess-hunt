@@ -20,3 +20,19 @@ to fake the dip; only ground-based photometry that resolves it can close that.
 | activity | no coherent rotation; flares rare, none in transit |
 
 Figures: `addendum_pixels_all_sectors.png`, `addendum_oddeven_secondary.png`, `addendum_secondary_scan_peak.png`, `addendum_depth_timing_activity.png`.
+
+## Statistical validation, independent pipeline and host diagnostics (2026-10-25, later)
+
+**TRICERATOPS** (`scripts/triceratops_fpp.py`, `data/deepvet_114949540/triceratops_{probs,stars,fpp}.csv`, `addendum_triceratops_fits.pdf`;
+light curve from sectors 1, 27, 105 folded and binned to 10 min, field from sectors 1 and 27, 200,000 samples): FPP = 0.033, NFPP = 0.011.
+Scenario posteriors: planet on target (TP) 0.82, planet on target with a bound planetary companion (PTP) 0.14, planet orbiting an
+unresolved stellar companion (STP) 0.021, eclipsing binary on the 13.9-arcsec neighbour TIC 1991882114 (NEB) 0.007, eclipsing binary on
+TIC 114949544 (NEB) 0.004. "Likely planet" by FPP (< 0.5) but NOT validated: NFPP = 0.011 exceeds the 10^-3 limit because the 13.9-arcsec
+neighbour (8.7% of the aperture flux) would need only an 8.2% eclipse. This is the same conclusion as the blend budget above, now with a
+number: a ground-based transit that resolves the pair is required, and nothing in TESS can substitute for it.
+
+**Independent pipeline (MIT QLP):** no QLP light curves exist for this star on MAST (checked 2026-10-25). Not available.
+
+**Host (Gaia DR3 + 2MASS)** (`host_diagnostics.json`): RUWE 1.014, astrometric excess noise 0.07 mas (0.5 sigma), C* = +0.011 (0.55
+sigma), 1% multi-peak windows, non_single_star = 0: no sign of an unresolved companion. Absolute K = 6.13 gives R = 0.424 Rsun and M = 0.419
+Msun (Mann 2015/2019) against the TIC's 0.422 / 0.416. Gaia Teff 3430 K vs TIC 3320 K.

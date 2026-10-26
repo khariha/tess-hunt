@@ -18,3 +18,23 @@ Run after TIC 259719966 turned out to be an eclipsing binary with its secondary 
 | activity | no coherent rotation period; 0-2 flares per sector, none in transit |
 
 Figures: `addendum_pixels_all_sectors.png`, `addendum_oddeven_secondary.png`, `addendum_secondary_scan_peak.png`, `addendum_depth_timing_activity.png`.
+
+## Statistical validation, independent pipeline and host diagnostics (2026-10-25, later)
+
+**TRICERATOPS** (`scripts/triceratops_fpp.py`, `data/deepvet_389723320/triceratops_{probs,stars,fpp}.csv`, `addendum_triceratops_fits.pdf`;
+light curve from all six sectors folded and binned to 10 min, field from the sectors 1 and 28 TESScut images, 200,000 samples):
+FPP = 0.019, NFPP = 0.0000. Scenario posteriors: planet on target with a bound planetary companion (PTP) 0.58, planet on target (TP) 0.40,
+planet orbiting an unresolved stellar companion (STP) 0.019, everything else < 0.002. By the Giacalone et al. (2021) criteria this is a
+"likely planet" (FPP < 0.5, NFPP < 10^-3); it misses the "validated" bar (FPP < 0.015) by 0.004, and the remaining 1.9% is the
+companion-host scenario, which only high-resolution imaging or a spectrum removes. The 31.7-arcsec neighbour (TIC 389723315, 10% of the
+aperture flux) would need an 11.6% eclipse; TRICERATOPS gives every nearby-star scenario < 0.0005.
+
+**Independent pipeline (MIT QLP)** (`scripts/qlp_check.py`, `qlp_check.csv`, `addendum_qlp_independent.png`): QLP has sectors 68 and 95.
+Folded at our ephemeris, the transit is recovered at 23.8 sigma (37,500 +/- 1,600 ppm in QLP's crowding-corrected flux, 2.9x our 13,100
+ppm; QLP's contamination correction for faint FFI stars is known to over-correct, and the depth ratio is not meaningful, the detection is).
+No secondary at phase 0.5 (-2,100 +/- 1,500 ppm) and the QLP all-phase scan is flat (rms 1,800 ppm, max 4,900 ppm at phase 0.11, 2.7x rms).
+
+**Host (Gaia DR3 + 2MASS)** (`scripts/gaia_diag.py`, `host_diagnostics.json`): RUWE 1.042, astrometric excess noise 0.04 mas (0.2 sigma),
+BP/RP excess C* = +0.012 (0.6 sigma of the single-star locus), 0% multi-peak windows, non_single_star = 0: no sign of a companion between
+~0.1 and 1 arcsec. Absolute K = 6.52 gives R = 0.371 Rsun (Mann 2015) and M = 0.358 Msun (Mann 2019) against the TIC's 0.373 / 0.361: the
+planet radius (4.6 Re) stands. Gaia Teff 3353 K vs TIC 3271 K.

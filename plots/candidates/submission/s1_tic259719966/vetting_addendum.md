@@ -266,3 +266,15 @@ px; the whole-frame prediction and the direction test above replace it.
 `addendum_pixels_all_sectors.png`, `addendum_centroid_vectors.png`, `addendum_sector103.png`,
 `addendum_blend_hypotheses.png`, `addendum_depth_timing_activity.png`, `addendum_oddeven_secondary.png`,
 `addendum_shape_density.png`, `addendum_secondary_eclipse.png`, `addendum_qlp_independent.png`.
+
+## TRICERATOPS control run (2026-10-25, later)
+
+Run as a control after the secondary eclipse was found (`scripts/triceratops_fpp.py`, `data/deepvet_259719966/triceratops_*.csv`,
+`addendum_triceratops_fits.pdf`; sectors 1, 27, 67, 94, 95, 103; 200,000 samples): **FPP = 0.0000, NFPP = 0.0000, P(planet on target) =
+1.00.** TRICERATOPS sees only the primary transit shape, depth and the field; it does not look for a secondary eclipse, and a 0.19 R*
+companion with a flat-bottomed 3.7% transit is a perfectly good planet to it. This is the clearest demonstration in the repository that
+statistical validation is not a substitute for the phase-curve tests: on this object it would have "validated" an eclipsing binary.
+
+Host diagnostics (`host_diagnostics.json`): RUWE 1.082, astrometric excess noise 0.08 mas (2.5 sigma), C* = +0.016 (1.2 sigma), 0%
+multi-peak, non_single_star = 0, Gaia RV 21.1 +/- 7.8 km/s (a single noisy epoch; the expected orbital semi-amplitude for a 0.09 Msun
+companion is ~14 km/s, so Gaia DR4 epoch RVs may show it). Absolute K = 5.70 gives R = 0.492 Rsun, M = 0.49 Msun (Mann), matching the TIC.

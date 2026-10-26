@@ -1,3 +1,7 @@
+# WITHDRAWN 2026-10-25: eclipsing binary, not a planet candidate
+
+A deeper vetting pass found a 0.92% secondary eclipse at orbital phase 0.54 (45 sigma, all nine sectors, confirmed in QLP); the orbit is eccentric (e = 0.27) and the companion is a late-M dwarf or brown dwarf. See vetting_addendum.md. The brief below is kept for the record and must not be circulated.
+
 # TIC 259719966: observer brief
 
 Transiting Jupiter-radius companion candidate around a mid-M dwarf. Prepared

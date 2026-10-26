@@ -1,0 +1,19 @@
+{
+  "TIC": 170102807,
+  "submitter": "Kishore Hariharan",
+  "group": "Generative Experiences / tess-hunt",
+  "period_days": 0.952986,
+  "period_err": 2e-06,
+  "epoch_BJD": 2460665.29534,
+  "epoch_err": 0.00528,
+  "depth_ppm": 2365,
+  "depth_err_ppm": 2557,
+  "duration_hours": 0.94,
+  "duration_err_hours": 0.12,
+  "planet_radius_Rearth": 2.71,
+  "planet_radius_err": 1.2,
+  "transit_snr": 0.9,
+  "sectors_used": "[6, 7, 8, 33, 34, 61, 87, 88]",
+  "tag": "tess-hunt FFI search, sector 6 detection, multi-sector confirmed",
+  "notes": "Detected in an independent BLS search of SPOC FFI cutouts (astrocut, S3 cubes) of Tmag 12-15 M dwarfs. Signal recovered independently in every available sector. Centroid and noise-normalized difference images place the dip on the target in all tested 200-s sectors. Odd/even depths agree within 2.1 sigma; no secondary eclipse. batman+emcee fit with free quadratic limb darkening. Transit-derived stellar density 3.8 solar vs TIC 3.8 solar. Not a TOI; no literature match; not in the ExoFOP CTOI list (4936 entries, 2026-10-26)."
+}
