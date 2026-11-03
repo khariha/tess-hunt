@@ -1,11 +1,10 @@
-\documentclass[RNAAS,linenumbers]{aastex631}
+\documentclass[RNAAS]{aastex631}
 \usepackage{amsmath}
-% AAS requires line numbers in the source (journals.aas.org/manuscript-preparation/#linenumber)
-\usepackage{lineno}
+% aastex631 loads lineno whenever amsmath is present and numbers the acknowledgments; AAS asked for no line numbers (2026-10-29)
+\let\fixmathlinenumbering\relax
 \newcommand{\tess}{\textit{TESS}}
 
 \begin{document}
-\linenumbers
 
 \title{Two Transiting Candidates around Faint M Dwarfs from an Agent-Driven Search of \tess\ Full-Frame Images}
 
